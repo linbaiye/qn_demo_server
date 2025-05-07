@@ -3,7 +3,9 @@ package org.example;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelId;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class GameServer implements Runnable {
@@ -19,6 +21,7 @@ public class GameServer implements Runnable {
     }
     private Map<ChannelId, PlayerChannel> channelPlayerMap = new HashMap<>();
 
+    private List<Message> messages = new ArrayList<>();
 
     public synchronized void handleLogin(Channel channel) {
         if (channelPlayerMap.containsKey(channel.id())) {
@@ -26,8 +29,11 @@ public class GameServer implements Runnable {
         }
         Player player = new Player(playerId++, coordinate);
         channelPlayerMap.put(channel.id(), new PlayerChannel(channel, player));
-        channel.writeAndFlush(new ShowMessage(player.getId(), player.getCoordinate()));
         coordinate = new Vector2(coordinate.x() + 1, coordinate.y());
+        channelPlayerMap.values().forEach(playerChannel -> {
+            var tmp = playerChannel.player;
+            channel.writeAndFlush(new ShowMessage(tmp.getId(), tmp.getCoordinate()));
+        });
     }
 
     public synchronized void handleChannelClosed(Channel channel) {
@@ -42,6 +48,9 @@ public class GameServer implements Runnable {
 
     @Override
     public void run() {
-
+        try {
+            while (true)
+                Thread.sleep(500);
+        } catch (Exception e){ }
     }
 }

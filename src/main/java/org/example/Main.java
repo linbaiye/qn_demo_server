@@ -46,6 +46,7 @@ public class Main {
                     }
                 });
         serverBootstrap.bind(9999).sync().channel();
+        new Thread(gameServer).start();
     }
 
 

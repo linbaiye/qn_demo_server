@@ -13,10 +13,6 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
         this.gameServer = gameServer;
     }
 
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        LOGGER.debug("Connected.");
-    }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
