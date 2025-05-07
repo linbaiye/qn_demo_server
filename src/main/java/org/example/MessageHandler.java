@@ -14,6 +14,11 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        LOGGER.debug("Connected.");
+    }
+
+    @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         LOGGER.debug("Received message {}.", msg);
         if (msg instanceof LoginMessage)

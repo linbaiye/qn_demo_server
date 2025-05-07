@@ -7,6 +7,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.LengthFieldPrepender;
 
 // Press Shift twice to open the Search Everywhere dialog and type `show whitespaces`,
 // then press Enter. You can now see whitespace characters in your code.
@@ -39,6 +40,8 @@ public class Main {
                         channel.pipeline()
                                 .addLast("messageDecoder", new MessageDecoder())
                                 .addLast("messageHandler", new MessageHandler(gameServer))
+                                .addLast("packetLengthAppender", new LengthFieldPrepender(4))
+                                .addLast("messageEncoder", new MessageEncoder())
                         ;
                     }
                 });

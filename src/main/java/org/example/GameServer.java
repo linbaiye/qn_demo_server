@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GameServer implements Runnable {
-    private long playerId = 0;
+    private int playerId = 0;
     private Vector2 coordinate = new Vector2(1, 3);
     private static class PlayerChannel {
         private final Channel channel;

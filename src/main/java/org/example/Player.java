@@ -5,13 +5,13 @@ import lombok.Getter;
 public class Player {
 
     private Vector2 coordinate;
-    private final long id;
-    public Player(long id, Vector2 coordinate) {
+    private final int id;
+    public Player(int id, Vector2 coordinate) {
         this.coordinate = coordinate;
         this.id = id;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
