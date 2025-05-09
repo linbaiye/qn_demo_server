@@ -16,11 +16,7 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        LOGGER.debug("Received message {}.", msg);
-        if (msg instanceof LoginMessage)
-            gameServer.handleLogin(ctx.channel());
-        else
-            gameServer.handleMessage(msg);
+        gameServer.onMessageArrived(ctx.channel(), msg);
     }
 
     @Override

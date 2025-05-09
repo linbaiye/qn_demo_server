@@ -1,7 +1,8 @@
 package org.example;
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,46 +12,71 @@ import java.util.Map;
 public class GameServer implements Runnable {
     private int playerId = 0;
     private Vector2 coordinate = new Vector2(1, 3);
-    private static class PlayerChannel {
-        private final Channel channel;
-        private final Player player;
-        private PlayerChannel(Channel channel, Player player) {
-            this.channel = channel;
-            this.player = player;
+    private final Map<Channel, List<Object>> pendingMessages = new HashMap<>();
+    private final Map<Channel, Player> channelPlayerMap = new HashMap<>();
+    private static final Logger LOGGER = LoggerFactory.getLogger(GameServer.class);
+
+    public synchronized void handleChannelClosed(Channel channel) {
+        synchronized (pendingMessages) {
+            List<Object> objects = pendingMessages.get(channel);
+            if (objects != null)
+                objects.add(new ConnectionClosedMessage(channel));
         }
     }
-    private Map<ChannelId, PlayerChannel> channelPlayerMap = new HashMap<>();
 
-    private List<Message> messages = new ArrayList<>();
+    public void onMessageArrived(Channel channel, Object message) {
+        synchronized (pendingMessages) {
+           pendingMessages.putIfAbsent(channel, new ArrayList<>());
+           pendingMessages.get(channel).add(message);
+        }
+    }
 
-    public synchronized void handleLogin(Channel channel) {
-        if (channelPlayerMap.containsKey(channel.id())) {
+
+    private void handleLogin(Channel channel) {
+        if (channelPlayerMap.containsKey(channel)) {
             return;
         }
         Player player = new Player(playerId++, coordinate);
-        channelPlayerMap.put(channel.id(), new PlayerChannel(channel, player));
         coordinate = new Vector2(coordinate.x() + 1, coordinate.y());
-        channelPlayerMap.values().forEach(playerChannel -> {
-            var tmp = playerChannel.player;
-            channel.writeAndFlush(new ShowMessage(tmp.getId(), tmp.getCoordinate()));
+        channel.write(new LoginOkMessage(player.getId(), coordinate));
+        channelPlayerMap.forEach((c, p) -> {
+            c.writeAndFlush(new ShowMessage(player.getId(), player.getCoordinate()));
+            channel.write(new ShowMessage(p.getId(), p.getCoordinate()));
         });
+        channel.flush();
+        channelPlayerMap.put(channel, player);
     }
 
-    public synchronized void handleChannelClosed(Channel channel) {
-        var playerChannel = channelPlayerMap.remove(channel.id());
-        if (playerChannel == null)
-            return;
+
+    private void handleMessages(Channel channel, List<Object> messages) {
+        for (Object message : messages) {
+            if (message instanceof LoginMessage) {
+                handleLogin(channel);
+            } else if (message instanceof ConnectionClosedMessage closedMessage) {
+                channelPlayerMap.remove(closedMessage.channel());
+                pendingMessages.remove(closedMessage.channel());
+                LOGGER.debug("Channel closed.");
+            }
+        }
     }
 
-    public synchronized void handleMessage(Object message) {
-
+    private void handleMessages() {
+        Map<Channel, List<Object>> messages;
+        synchronized (pendingMessages) {
+            messages = new HashMap<>(pendingMessages);
+        }
+        messages.forEach(this::handleMessages);
     }
+
+
 
     @Override
     public void run() {
         try {
-            while (true)
-                Thread.sleep(500);
+            while (true) {
+                Thread.sleep(10);
+                handleMessages();
+            }
         } catch (Exception e){ }
     }
 }

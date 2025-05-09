@@ -4,6 +4,7 @@ public enum MessageType {
     Login(0),
     Move(1),
     Show(2),
+    LoginOk(3),
     ;
     private final int value;
 
