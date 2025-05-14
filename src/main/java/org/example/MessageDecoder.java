@@ -26,7 +26,7 @@ public class MessageDecoder extends LengthFieldBasedFrameDecoder {
         MessageType type = MessageType.fromValue(value);
         return switch (type) {
             case Login -> new LoginMessage();
-            case Move -> MoveMessage.create(byteBuf.readInt(), byteBuf.readInt(), byteBuf.readInt());
+            case Move -> MoveInput.create(byteBuf.readInt(), byteBuf.readInt(), byteBuf.readInt());
             default -> null;
         };
     }

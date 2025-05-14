@@ -2,13 +2,7 @@ package org.example;
 
 import io.netty.buffer.ByteBufAllocator;
 
-public record MoveMessage(Vector2 from, Direction direction) implements Message {
-
-
-    public static MoveMessage create(int x, int y, int dir) {
-        return new MoveMessage(new Vector2(x, y), Direction.fromValue(dir));
-    }
-
+public record PlayerMoveMessage(int playerId, Vector2 from, Direction dir) implements Message {
     @Override
     public byte[] toBytes() {
         byte[] bytes = new byte[16];
@@ -16,7 +10,8 @@ public record MoveMessage(Vector2 from, Direction direction) implements Message 
         buffer.writeInt(MessageType.Move.value());
         buffer.writeInt(from().x());
         buffer.writeInt(from().y());
-        buffer.writeInt(direction().value());
+        buffer.writeInt(dir.value());
         return bytes;
     }
+
 }

@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GameServer implements Runnable {
+public class GameServer implements Runnable, EventListener {
     private int playerId = 0;
     private Vector2 coordinate = new Vector2(1, 3);
     private final Map<Channel, List<Object>> pendingMessages = new HashMap<>();
@@ -36,7 +36,7 @@ public class GameServer implements Runnable {
         if (channelPlayerMap.containsKey(channel)) {
             return;
         }
-        Player player = new Player(playerId++, coordinate);
+        Player player = new Player(playerId++, coordinate, this);
         coordinate = new Vector2(coordinate.x() + 1, coordinate.y());
         channel.write(new LoginOkMessage(player.getId(), coordinate));
         channelPlayerMap.forEach((c, p) -> {
@@ -68,15 +68,21 @@ public class GameServer implements Runnable {
         messages.forEach(this::handleMessages);
     }
 
+    @Override
+    public void run() {
+        int millis = 10;
+        try {
+            while (true) {
+                Thread.sleep(millis);
+                handleMessages();
+                channelPlayerMap.values().forEach(p -> p.update(millis));
+            }
+        } catch (Exception e){ }
+    }
 
 
     @Override
-    public void run() {
-        try {
-            while (true) {
-                Thread.sleep(10);
-                handleMessages();
-            }
-        } catch (Exception e){ }
+    public void onPlayerEvent(PlayerMoveMessage message) {
+
     }
 }
