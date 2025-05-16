@@ -5,9 +5,9 @@ import io.netty.buffer.ByteBufAllocator;
 public class LoginOkMessage implements Message {
     private final int id;
 
-    private final Vector2 coordinate;
+    private final Coordinate coordinate;
 
-    public LoginOkMessage(int id, Vector2 coordinate) {
+    public LoginOkMessage(int id, Coordinate coordinate) {
         this.id = id;
         this.coordinate = coordinate;
     }

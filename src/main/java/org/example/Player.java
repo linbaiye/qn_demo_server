@@ -2,7 +2,7 @@ package org.example;
 
 
 public class Player {
-    private Vector2 coordinate;
+    private Coordinate coordinate;
 
     private final int id;
 
@@ -14,7 +14,7 @@ public class Player {
 
     private final EventListener eventListener;
 
-    public Player(int id, Vector2 coordinate, EventListener eventListener) {
+    public Player(int id, Coordinate coordinate, EventListener eventListener) {
         this.coordinate = coordinate;
         this.id = id;
         this.state = State.IDLE;
@@ -35,6 +35,7 @@ public class Player {
         if (millisLeft <= 0)
             return;
         millisLeft -= delta;
+        coordinate = coordinate.move(direction);
         if (millisLeft <= 0) {
             state = State.IDLE;
         }
@@ -44,7 +45,7 @@ public class Player {
         return id;
     }
 
-    public Vector2 getCoordinate() {
+    public Coordinate getCoordinate() {
         return coordinate;
     }
 }

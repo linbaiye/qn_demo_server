@@ -6,9 +6,9 @@ public class ShowMessage implements Message {
 
     private final int id;
 
-    private final Vector2 coordinate;
+    private final Coordinate coordinate;
 
-    public ShowMessage(int id, Vector2 coordinate) {
+    public ShowMessage(int id, Coordinate coordinate) {
         this.id = id;
         this.coordinate = coordinate;
     }
