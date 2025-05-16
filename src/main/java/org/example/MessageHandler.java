@@ -23,4 +23,8 @@ public class MessageHandler extends ChannelInboundHandlerAdapter {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         gameServer.handleChannelClosed(ctx.channel());
     }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+    }
 }

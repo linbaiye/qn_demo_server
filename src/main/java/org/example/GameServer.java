@@ -16,6 +16,12 @@ public class GameServer implements Runnable, EventListener {
     private final Map<Channel, Player> channelPlayerMap = new HashMap<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(GameServer.class);
 
+    private record DelayedMessage(long arrivedTime, Channel channel, Object message) {
+        public boolean isTimeUp(long current) {
+            return current - arrivedTime >= 100;
+        }
+    }
+
     public synchronized void handleChannelClosed(Channel channel) {
         synchronized (pendingMessages) {
             List<Object> objects = pendingMessages.get(channel);
@@ -26,8 +32,8 @@ public class GameServer implements Runnable, EventListener {
 
     public void onMessageArrived(Channel channel, Object message) {
         synchronized (pendingMessages) {
-           pendingMessages.putIfAbsent(channel, new ArrayList<>());
-           pendingMessages.get(channel).add(message);
+            pendingMessages.putIfAbsent(channel, new ArrayList<>());
+            pendingMessages.get(channel).add(message);
         }
     }
 
@@ -38,12 +44,11 @@ public class GameServer implements Runnable, EventListener {
         }
         Player player = new Player(playerId++, coordinate, this);
         coordinate = new Vector2(coordinate.x() + 1, coordinate.y());
-        channel.write(new LoginOkMessage(player.getId(), coordinate));
+        channel.writeAndFlush(new LoginOkMessage(player.getId(), player.getCoordinate()));
         channelPlayerMap.forEach((c, p) -> {
             c.writeAndFlush(new ShowMessage(player.getId(), player.getCoordinate()));
-            channel.write(new ShowMessage(p.getId(), p.getCoordinate()));
+            channel.writeAndFlush(new ShowMessage(p.getId(), p.getCoordinate()));
         });
-        channel.flush();
         channelPlayerMap.put(channel, player);
     }
 
@@ -56,6 +61,10 @@ public class GameServer implements Runnable, EventListener {
                 channelPlayerMap.remove(closedMessage.channel());
                 pendingMessages.remove(closedMessage.channel());
                 LOGGER.debug("Channel closed.");
+            } else if (message instanceof MoveInput moveInput) {
+                var player = channelPlayerMap.get(channel);
+                if (player != null)
+                    player.move(moveInput);
             }
         }
     }
@@ -64,6 +73,7 @@ public class GameServer implements Runnable, EventListener {
         Map<Channel, List<Object>> messages;
         synchronized (pendingMessages) {
             messages = new HashMap<>(pendingMessages);
+            pendingMessages.clear();
         }
         messages.forEach(this::handleMessages);
     }
@@ -83,6 +93,9 @@ public class GameServer implements Runnable, EventListener {
 
     @Override
     public void onPlayerEvent(PlayerMoveMessage message) {
-
+        channelPlayerMap.forEach((c, p) -> {
+            if (p.getId() != message.playerId())
+                c.writeAndFlush(message);
+        });
     }
 }

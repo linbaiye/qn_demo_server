@@ -8,7 +8,7 @@ public class Player {
 
     private State state;
 
-    private int stateSecondsLeft;
+    private int millisLeft;
 
     private Direction direction;
 
@@ -23,18 +23,19 @@ public class Player {
     }
 
 
-    public void move(Vector2 coordinate, Direction direction) {
-        if (!coordinate.equals(this.coordinate)) {
-            this.state = State.MOVE;
-            eventListener.onPlayerEvent(new PlayerMoveMessage(id, coordinate, direction));
-        }
+    public void move(MoveInput input) {
+        this.state = State.MOVE;
+        direction = input.direction();
+        millisLeft = 840;
+        eventListener.onPlayerEvent(new PlayerMoveMessage(id, coordinate, direction));
     }
 
+
     public void update(int delta) {
-        if (stateSecondsLeft <= 0)
+        if (millisLeft <= 0)
             return;
-        stateSecondsLeft -= delta;
-        if (stateSecondsLeft <= 0) {
+        millisLeft -= delta;
+        if (millisLeft <= 0) {
             state = State.IDLE;
         }
     }
