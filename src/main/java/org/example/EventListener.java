@@ -2,5 +2,7 @@ package org.example;
 
 public interface EventListener {
 
-    void onPlayerEvent(PlayerMoveMessage message);
+    void onPlayerEvent(PlayerMoveEvent message);
+
+    void onPositionEvent(PositionEvent event);
 }

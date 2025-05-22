@@ -1,6 +1,6 @@
 package org.example;
 
-public enum State {
+public enum StateEnum {
     MOVE,
     IDLE,
 

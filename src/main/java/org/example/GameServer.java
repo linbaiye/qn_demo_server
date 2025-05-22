@@ -1,11 +1,13 @@
 package org.example;
 
 import io.netty.channel.Channel;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+@Slf4j
 public class GameServer implements Runnable, EventListener {
     private int playerId = 0;
     private Coordinate coordinate = new Coordinate(1, 3);
@@ -69,7 +71,7 @@ public class GameServer implements Runnable, EventListener {
             } else if (message instanceof MoveInput moveInput) {
                 var player = channelPlayerMap.get(channel);
                 if (player != null)
-                    player.move(moveInput);
+                    player.handle(moveInput);
             }
         }
     }
@@ -92,11 +94,16 @@ public class GameServer implements Runnable, EventListener {
     @Override
     public void run() {
         int millis = 10;
+        long accumulated = System.currentTimeMillis();
         try {
             while (true) {
-                Thread.sleep(millis);
                 handleMessages();
-                channelPlayerMap.values().forEach(p -> p.update(millis));
+                long current = System.currentTimeMillis();
+                while (accumulated <= current) {
+                    channelPlayerMap.values().forEach(p -> p.update(millis));
+                    accumulated += millis;
+                }
+                Thread.sleep(millis);
             }
         } catch (Exception e){
             LOGGER.error("exception ", e);
@@ -105,7 +112,7 @@ public class GameServer implements Runnable, EventListener {
 
 
     @Override
-    public void onPlayerEvent(PlayerMoveMessage message) {
+    public void onPlayerEvent(PlayerMoveEvent message) {
         channelPlayerMap.forEach((c, p) -> {
             if (p.getId() != message.playerId())
                 c.writeAndFlush(message);
