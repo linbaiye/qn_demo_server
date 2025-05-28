@@ -43,4 +43,16 @@ public enum Direction {
     public int YOffset() {
         return UP_DIR.contains(this) ? -1 : (DOWN_DIR.contains(this) ? 1 : 0);
     }
+
+    public static void main(String[] args) {
+        var coor = new Coordinate(1, 1);
+        System.out.println(coor.move(Direction.Up));
+        System.out.println(coor.move(Direction.UpRight));
+        System.out.println(coor.move(Direction.Right));
+        System.out.println(coor.move(Direction.DownRight));
+        System.out.println(coor.move(Direction.Down));
+        System.out.println(coor.move(Direction.DownLeft));
+        System.out.println(coor.move(Direction.Left));
+        System.out.println(coor.move(Direction.UpLeft));
+    }
 }

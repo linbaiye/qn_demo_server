@@ -27,7 +27,7 @@ public record Coordinate(int x, int y) {
 
     @Override
     public String toString() {
-        return "Coordinate{" +
+        return "{" +
                 "x=" + x +
                 ", y=" + y +
                 '}';

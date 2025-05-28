@@ -31,23 +31,24 @@ public class MoveState implements PlayerState {
             return;
         if (millisLeft == 840) {
             if (!currentInput.from().equals(player.getCoordinate())) {
-                log.debug("Recieved {}, current {}.", currentInput.from(), player.getCoordinate());
+                log.debug("Rewind, from {} to {}, current {}.", currentInput.from(), currentInput.to(), player.getCoordinate());
                 player.changeToIdle(player.getCoordinate());
                 player.emitEvent(new PositionEvent(player.getId(), player.getCoordinate(), player.getDirection()));
                 return;
             }
+            log.debug("Moving from {} to {}.", player.getCoordinate(), currentInput.to());
             player.setDirection(currentInput.direction());
             player.emitEvent(new PlayerMoveEvent(player.getId(), player.getCoordinate(), player.getDirection()));
 //            log.debug("Sent move event.");
         }
         millisLeft -= delta;
-        if (millisLeft == 0) {
+        if (millisLeft <= 0) {
+            player.setCoordinate(player.getCoordinate().move(currentInput.direction()));
             if (moveInputList.isEmpty()) {
-                player.changeToIdle(player.getCoordinate().move(currentInput.direction()));
+                player.changeToIdle(player.getCoordinate());
                 return;
             }
             currentInput = moveInputList.remove(0);
-            player.setCoordinate(player.getCoordinate().move(currentInput.direction()));
             millisLeft = 840;
         }
     }
