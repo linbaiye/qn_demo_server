@@ -31,13 +31,14 @@ public class MoveState implements PlayerState {
             return;
         if (millisLeft == 840) {
             if (!currentInput.from().equals(player.getCoordinate())) {
-                player.changeToIdle();
-                player.emitEvent(new PositionEvent());
+                log.debug("Recieved {}, current {}.", currentInput.from(), player.getCoordinate());
+                player.changeToIdle(player.getCoordinate());
+                player.emitEvent(new PositionEvent(player.getId(), player.getCoordinate(), player.getDirection()));
                 return;
             }
             player.setDirection(currentInput.direction());
             player.emitEvent(new PlayerMoveEvent(player.getId(), player.getCoordinate(), player.getDirection()));
-            log.debug("Sent move event.");
+//            log.debug("Sent move event.");
         }
         millisLeft -= delta;
         if (millisLeft == 0) {

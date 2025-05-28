@@ -29,7 +29,7 @@ public class Player {
     }
 
     public void emitEvent(PositionEvent positionEvent) {
-        eventListener.onPlayerEvent(event);
+        eventListener.onPositionEvent(positionEvent);
     }
 
     public void setCoordinate(Coordinate coordinate) {

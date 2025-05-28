@@ -118,4 +118,9 @@ public class GameServer implements Runnable, EventListener {
                 c.writeAndFlush(message);
         });
     }
+
+    @Override
+    public void onPositionEvent(PositionEvent event) {
+        channelPlayerMap.forEach((c, p) -> c.writeAndFlush(event));
+    }
 }
