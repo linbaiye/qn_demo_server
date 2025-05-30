@@ -15,11 +15,14 @@ public class MoveState implements PlayerState {
 
     private MoveInput currentInput;
 
+    private static final int walkMills = 840;
+    private static final int runMillis = 600;
+
     public MoveState(Player player, MoveInput input) {
         this.player = player;
         moveInputList = new ArrayList<>();
         currentInput = input;
-        millisLeft = 840;
+        millisLeft = runMillis;
     }
 
     public void handle(MoveInput input) {
@@ -29,7 +32,7 @@ public class MoveState implements PlayerState {
     public void update(int delta) {
         if (millisLeft <= 0)
             return;
-        if (millisLeft == 840) {
+        if (millisLeft == runMillis) {
             if (!currentInput.from().equals(player.getCoordinate())) {
                 log.debug("Rewind, from {} to {}, current {}.", currentInput.from(), currentInput.to(), player.getCoordinate());
                 player.changeToIdle(player.getCoordinate());
@@ -46,10 +49,11 @@ public class MoveState implements PlayerState {
             player.setCoordinate(player.getCoordinate().move(currentInput.direction()));
             if (moveInputList.isEmpty()) {
                 player.changeToIdle(player.getCoordinate());
+                player.emitEvent(new PositionEvent(player.getId(), player.getCoordinate(), player.getDirection()));
                 return;
             }
             currentInput = moveInputList.remove(0);
-            millisLeft = 840;
+            millisLeft = runMillis;
         }
     }
 }
