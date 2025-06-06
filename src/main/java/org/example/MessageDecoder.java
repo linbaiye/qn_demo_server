@@ -27,6 +27,8 @@ public class MessageDecoder extends LengthFieldBasedFrameDecoder {
         var msg = switch (type) {
             case Login -> new LoginMessage();
             case Move -> MoveInput.create(byteBuf.readInt(), byteBuf.readInt(), byteBuf.readInt());
+            case FootKungFu -> new FootKungFuInput();
+            case Equip -> new EquipInput(WeaponType.fromValue(byteBuf.readInt()));
             default -> null;
         };
         byteBuf.release();

@@ -7,6 +7,9 @@ public enum MessageType {
     LoginOk(3),
     Remove(4),
     POSITION(5),
+    FootKungFu(6),
+
+    Equip(7)
     ;
     private final int value;
 

@@ -22,7 +22,13 @@ public class MoveState implements PlayerState {
         this.player = player;
         moveInputList = new ArrayList<>();
         currentInput = input;
-        millisLeft = runMillis;
+        millisLeft = getMoveMillis();
+    }
+
+    private int getMoveMillis() {
+        if (player.isFootKungFuEnabled())
+            return runMillis;
+        return walkMills;
     }
 
     public void handle(MoveInput input) {
@@ -32,7 +38,7 @@ public class MoveState implements PlayerState {
     public void update(int delta) {
         if (millisLeft <= 0)
             return;
-        if (millisLeft == runMillis) {
+        if (millisLeft == getMoveMillis()) {
             if (!currentInput.from().equals(player.getCoordinate())) {
                 log.debug("Rewind, from {} to {}, current {}.", currentInput.from(), currentInput.to(), player.getCoordinate());
                 player.changeToIdle(player.getCoordinate());
@@ -41,7 +47,7 @@ public class MoveState implements PlayerState {
             }
             log.debug("Moving from {} to {}.", player.getCoordinate(), currentInput.to());
             player.setDirection(currentInput.direction());
-            player.emitEvent(new PlayerMoveEvent(player.getId(), player.getCoordinate(), player.getDirection()));
+            player.emitEvent(new PlayerMoveEvent(player.getId(), player.getCoordinate(), player.getDirection(), player.isFootKungFuEnabled() ? MoveAction.Run : MoveAction.Walk));
 //            log.debug("Sent move event.");
         }
         millisLeft -= delta;
@@ -49,11 +55,11 @@ public class MoveState implements PlayerState {
             player.setCoordinate(player.getCoordinate().move(currentInput.direction()));
             if (moveInputList.isEmpty()) {
                 player.changeToIdle(player.getCoordinate());
-                player.emitEvent(new PositionEvent(player.getId(), player.getCoordinate(), player.getDirection()));
+//                player.emitEvent(new PositionEvent(player.getId(), player.getCoordinate(), player.getDirection()));
                 return;
             }
             currentInput = moveInputList.remove(0);
-            millisLeft = runMillis;
+            millisLeft = getMoveMillis();
         }
     }
 }

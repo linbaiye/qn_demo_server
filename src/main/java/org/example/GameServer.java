@@ -72,6 +72,14 @@ public class GameServer implements Runnable, EventListener {
                 var player = channelPlayerMap.get(channel);
                 if (player != null)
                     player.handle(moveInput);
+            } else if (message instanceof FootKungFuInput ) {
+                var player = channelPlayerMap.get(channel);
+                if (player != null)
+                    player.toggleFootKungFu();
+            } else if (message instanceof EquipInput equipInput) {
+                var player = channelPlayerMap.get(channel);
+                if (player != null)
+                    player.setWeaponType(equipInput.weaponType());
             }
         }
     }
@@ -121,6 +129,19 @@ public class GameServer implements Runnable, EventListener {
 
     @Override
     public void onPositionEvent(PositionEvent event) {
+        channelPlayerMap.forEach((c, p) -> c.writeAndFlush(event));
+    }
+
+    @Override
+    public void onFootKungFuEvent(FootKungFuEvent event) {
+        channelPlayerMap.forEach((c, p) -> {
+            if (p.getId() == event.playerId())
+                c.writeAndFlush(event);
+        });
+    }
+
+    @Override
+    public void onEquipWeaponEvent(EquipWeaponEvent event) {
         channelPlayerMap.forEach((c, p) -> c.writeAndFlush(event));
     }
 }

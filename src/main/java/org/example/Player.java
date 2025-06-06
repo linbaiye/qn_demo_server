@@ -1,6 +1,7 @@
 package org.example;
 
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -11,13 +12,25 @@ public class Player {
     private PlayerState state;
     private final EventListener eventListener;
 
+    @Getter
+    private boolean footKungFuEnabled;
+
+    private WeaponType weaponType;
+
     public Player(int id, Coordinate coordinate, EventListener eventListener) {
         this.coordinate = coordinate;
         this.id = id;
         this.direction = Direction.Down;
         this.eventListener = eventListener;
         this.state = new IdleState(this);
+        this.footKungFuEnabled = false;
     }
+
+    public void toggleFootKungFu() {
+        footKungFuEnabled = !footKungFuEnabled;
+        emitEvent(new FootKungFuEvent(id, footKungFuEnabled));
+    }
+
 
 
     public void handle(MoveInput input) {
@@ -28,8 +41,17 @@ public class Player {
         eventListener.onPlayerEvent(event);
     }
 
-    public void emitEvent(PositionEvent positionEvent) {
-        eventListener.onPositionEvent(positionEvent);
+    public void setWeaponType(WeaponType weaponType) {
+        this.weaponType = weaponType;
+        eventListener.onEquipWeaponEvent(new EquipWeaponEvent(this.id, this.weaponType));
+    }
+
+    public void emitEvent(FootKungFuEvent event) {
+        eventListener.onFootKungFuEvent(event);
+    }
+
+    public void emitEvent(PositionEvent event) {
+        eventListener.onPositionEvent(event);
     }
 
     public void setCoordinate(Coordinate coordinate) {
